@@ -8,6 +8,7 @@ const serviceAccount = require("./serviceAccountKey.json");
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
 });
+const db = admin.firestore();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -58,13 +59,28 @@ app.post("/", function (req, res) {
     .setCustomUserClaims(req.body.uid, {
       userType: req.body.userType,
     })
-    .then((ref) => {
+    .then(() => {
       console.log("Custom Claim Added to UID.");
-      res.sendStatus(200);
+      db.collection("users")
+        .doc(req.body.uid)
+        .set({
+          email: req.body.email,
+          password: req.body.password,
+          uid: req.body.uid,
+          userName: req.body.userName,
+          userType: req.body.userType,
+        })
+        .then(res.sendStatus(200))
+        .catch((err) => {
+          admin.auth().deleteUser(req.body.uid);
+          console.error(err);
+          res.send(err, 404);
+        });
     })
     .catch((err) => {
-      console.log(err);
-      res.send(err);
+      admin.auth().deleteUser(req.body.uid);
+      console.error(err);
+      res.send(err, 404);
     });
 });
 
