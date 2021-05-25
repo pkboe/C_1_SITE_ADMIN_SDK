@@ -70,7 +70,10 @@ app.post("/", function (req, res) {
           userName: req.body.userName,
           userType: req.body.userType,
         })
-        .then(res.sendStatus(200))
+        .then(() => {
+          console.log("SuccessFully Stored To FireStore");
+          res.sendStatus(200);
+        })
         .catch((err) => {
           admin.auth().deleteUser(req.body.uid);
           console.error(err);
