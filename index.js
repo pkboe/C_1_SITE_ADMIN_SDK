@@ -11,7 +11,7 @@ admin.initializeApp({
 const db = admin.firestore();
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001;
 
 var corsOptions = {
   origin: "http://localhost:3000",
@@ -58,9 +58,11 @@ app.post("/", function (req, res) {
     .auth()
     .setCustomUserClaims(req.body.uid, {
       userType: req.body.userType,
+      studentPRN: req.body.userType == "student" ? req.body.studentPRN : "",
     })
     .then(() => {
       console.log("Custom Claim Added to UID.");
+      console.log(req.body.studentPRN);
       db.collection("users")
         .doc(req.body.uid)
         .set({
@@ -69,9 +71,10 @@ app.post("/", function (req, res) {
           uid: req.body.uid,
           userName: req.body.userName,
           userType: req.body.userType,
+          studentPRN: req.body.userType == "student" ? req.body.studentPRN : "",
         })
-        .then(() => {
-          console.log("SuccessFully Stored To FireStore");
+        .then((x) => {
+          console.log("SuccessFully Stored To FireStore", x);
           res.send(true, 200);
         })
         .catch((err) => {
